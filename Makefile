@@ -19,6 +19,8 @@ check_image = make --silent list | grep -w '$(1)' >/dev/null 2>&1 || { echo "Err
 bake_base_cli := docker buildx bake --file docker-bake.hcl
 ## Command to be used on build (only)
 bake_cli := $(bake_base_cli) --load
+## Default bake target
+bake_default_target := linux
 
 .PHONY: build
 .PHONY: test test-alpine test-debian
@@ -56,10 +58,10 @@ build-%:
 	@set -x; $(bake_cli) '$*' --set '*.platform=linux/$(ARCH)'
 
 every-build: check-reqs
-	@set -x; $(bake_cli) linux
+	@set -x; $(bake_cli) $(bake_default_target)
 
 show:
-	@$(bake_base_cli) --progress=quiet linux --print | jq
+	@$(bake_base_cli) --progress=quiet $(bake_default_target) --print | jq
 
 tags:
 	@make show | jq -r '.target[].tags[]' | LC_ALL=C sort
@@ -81,7 +83,7 @@ prepare-test: bats check-reqs
 	mkdir -p target
 
 publish:
-	@set -x; $(bake_base_cli) linux --push
+	@set -x; $(bake_base_cli) $(bake_default_target) --push
 
 ## Define bats options based on environment
 # common flags for all tests
