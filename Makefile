@@ -17,6 +17,7 @@ check_cli = type "$(1)" >/dev/null 2>&1 || { echo "Error: command '$(1)' require
 check_image = make --silent list | grep -w '$(1)' >/dev/null 2>&1 || { echo "Error: the image '$(1)' does not exist in manifest for the platform 'linux/$(ARCH)'. Please check the output of 'make list'. Exiting." ; exit 1 ; }
 ## Base "docker buildx base" command to be reused everywhere
 bake_base_cli := docker buildx bake --file docker-bake.hcl
+## Command to be used on build (only)
 bake_cli := $(bake_base_cli) --load
 
 .PHONY: build
@@ -55,7 +56,7 @@ build-%:
 	@set -x; $(bake_cli) '$*' --set '*.platform=linux/$(ARCH)'
 
 every-build: check-reqs
-	@set -x; $(bake_base_cli) linux
+	@set -x; $(bake_cli) linux
 
 show:
 	@$(bake_base_cli) --progress=quiet linux --print | jq
@@ -64,7 +65,7 @@ tags:
 	@make show | jq -r '.target[].tags[]' | LC_ALL=C sort
 
 show-%:
-	@$(bake_cli) $* --progress=quiet --print | jq
+	@$(bake_base_cli) $* --progress=quiet --print | jq
 
 tags-%:
 	@make show-$* | jq -r '.target[].tags[]' | LC_ALL=C sort
