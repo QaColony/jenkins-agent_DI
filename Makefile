@@ -94,7 +94,7 @@ show:
 
 # Show a specific target
 show-%:
-	@$(bake_base_cli) $* --progress=quiet --print | jq
+	@set -x; $(bake_base_cli) --progress=quiet --print $* | jq
 
 # List tags of all default targets
 tags:
@@ -102,7 +102,7 @@ tags:
 
 # List tags of a specific target
 tags-%:
-	@make show-$* | jq -r '.target[].tags[]' | LC_ALL=C sort
+	@set -x; make --silent show-$* | jq -r '.target[].tags[]' | LC_ALL=C sort
 
 # Return the list of targets depending on the current OS and architecture
 list: check-reqs
@@ -141,7 +141,7 @@ test-%: prepare-test
 # Check that the image exists in the manifest
 	@$(call check_image,$*)
 # Ensure that the image is built
-	@make --silent build-$*
+	@set -x; make --silent build-$*
 	@echo "== testing $*"
 	set -x
 # Each type of image ("agent" or "inbound-agent") has its own tests suite
@@ -154,5 +154,5 @@ else
 endif
 
 # Test targets depending on the current architecture
-test: prepare-test
-	@make --silent list | while read image; do make --silent "test-$${image}"; done
+test:
+	@set -x; make --silent list | while read image; do make --silent "test-$${image}"; done
