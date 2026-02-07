@@ -61,13 +61,13 @@ every-build: check-reqs
 	@set -x; $(bake_cli) $(bake_default_target)
 
 show:
-	@$(bake_base_cli) --progress=quiet $(bake_default_target) --print | jq
-
-tags:
-	@make show | jq -r '.target[].tags[]' | LC_ALL=C sort
+	@set -x; make --silent show-$(bake_default_target)
 
 show-%:
 	@$(bake_base_cli) $* --progress=quiet --print | jq
+
+tags:
+	@set -x; make --silent tags-$(bake_default_target)
 
 tags-%:
 	@make show-$* | jq -r '.target[].tags[]' | LC_ALL=C sort
