@@ -158,7 +158,7 @@ ifeq ($(CI), true)
 	IMAGE=$* bats/bin/bats $(CURDIR)/tests/tests_$(shell echo $* |  cut -d "_" -f 1).bats $(bats_flags) --formatter junit | tee target/junit-results-$*.xml
 else
 # Execute the test harness
-	IMAGE=$* bats/bin/bats $(CURDIR)/tests/tests_$(shell echo $* |  cut -d "_" -f 1).bats $(bats_flags)
+	IMAGE=$* bats/bin/bats $(CURDIR)/tests/tests_$(shell echo $* |  cut -d "_" -f 1).bats $(bats_flags) --timing
 endif
 
 # Test targets depending on the current architecture
