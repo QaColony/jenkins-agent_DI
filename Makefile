@@ -78,8 +78,12 @@ list: check-reqs
 bats:
 	git clone --branch v1.13.0 https://github.com/bats-core/bats-core ./bats
 
-prepare-test: bats check-reqs
+# Ensure all bats submodules are up to date
+prepare-test: bats check-reqs target
 	git submodule update --init --recursive
+
+# Ensure tests and build metadata "target" folder exist
+target:
 	mkdir -p target
 
 publish:
