@@ -7,14 +7,31 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 ## Required to have docker build output always printed on stdout
 export BUILDKIT_PROGRESS=plain
 
+current_os := $(shell uname -s)
 current_arch := $(shell uname -m)
-export ARCH ?= $(shell case $(current_arch) in (x86_64) echo "amd64" ;; (i386) echo "386";; (aarch64|arm64) echo "arm64" ;; (armv6*) echo "arm/v6";; (armv7*) echo "arm/v7";; (s390*|riscv*|ppc64le) echo $(current_arch);; (*) echo "UNKNOWN-CPU";; esac)
+
+export OS ?= $(shell \
+	case "$(current_os)" in \
+		(Linux) echo linux ;; \
+		(Darwin) echo linux ;; \
+		(MINGW*|MSYS*|CYGWIN*) echo windows ;; \
+		(*) echo unknown ;; \
+	esac)
+
+export ARCH ?= $(shell \
+	case $(current_arch) in \
+		(x86_64) echo "amd64" ;; \
+		(aarch64|arm64) echo "arm64" ;; \
+		(armv7*) echo "arm/v7";; \
+		(s390*|riscv*|ppc64le) echo $(current_arch);; \
+		(*) echo "UNKNOWN-CPU";; \
+	esac)
 
 ##### Macros
 ## Check the presence of a CLI in the current PATH
 check_cli = type "$(1)" >/dev/null 2>&1 || { echo "Error: command '$(1)' required but not found. Exiting." ; exit 1 ; }
 ## Check if a given image exists in the current manifest docker-bake.hcl
-check_image = make --silent list | grep -w '$(1)' >/dev/null 2>&1 || { echo "Error: the image '$(1)' does not exist in manifest for the platform 'linux/$(ARCH)'. Please check the output of 'make list'. Exiting." ; exit 1 ; }
+check_image = make --silent list | grep -w '$(1)' >/dev/null 2>&1 || { echo "Error: the image '$(1)' does not exist in manifest for the current platform '$(OS)/$(ARCH)'. Please check the output of 'make list'. Exiting." ; exit 1 ; }
 ## Base "docker buildx base" command to be reused everywhere
 bake_base_cli := docker buildx bake --file docker-bake.hcl
 ## Command to be used on build (only)
@@ -59,13 +76,13 @@ shellcheck:
 
 # Build all targets with the current OS and architecture
 build: check-reqs
-	@set -x; $(bake_cli) $(shell make --silent list) --set '*.platform=linux/$(ARCH)'
+	@set -x; $(bake_cli) $(shell make --silent list) --set '*.platform=$(OS)/$(ARCH)'
 
 # Build a specific target with the current OS and architecture
 build-%:
 	@$(call check_image,$*)
 	@echo "== building $*"
-	@set -x; $(bake_cli) '$*' --set '*.platform=linux/$(ARCH)'
+	@set -x; $(bake_cli) '$*' --set '*.platform=$(OS)/$(ARCH)'
 
 # Build all default targets independently of the architecture
 every-build: check-reqs
@@ -89,7 +106,7 @@ tags-%:
 
 # Return the list of targets depending on the current OS and architecture
 list: check-reqs
-	@set -x; make --silent show | jq -r '.target | path(.. | select(.platforms[] | contains("linux/$(ARCH)"))?) | add'
+	@set -x; make --silent show | jq -r '.target | path(.. | select(.platforms[] | contains("$(OS)/$(ARCH)"))?) | add'
 
 # Ensure bats exists in the current folder
 bats:
