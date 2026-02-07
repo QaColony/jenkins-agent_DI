@@ -2,6 +2,7 @@
 
 load test_helpers
 
+# shellcheck disable=SC2034
 SUT_DESCRIPTION="tags"
 
 @test "[${SUT_DESCRIPTION}] Default Linux tags unchanged" {
