@@ -106,7 +106,7 @@ tags:
 
 # List tags of a specific target
 tags-%:
-	@set -x; make --silent show-$* | jq -r '.target[].tags[]' | LC_ALL=C sort
+	@set -x; make --silent show-$* | jq -r '.target | to_entries[] | .key as $$name | .value.tags[] | "\(.) (\($$name))"' | LC_ALL=C sort -u
 
 # Return the list of targets depending on the current OS and architecture
 list: check-reqs
