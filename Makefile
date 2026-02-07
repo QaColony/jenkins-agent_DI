@@ -37,7 +37,7 @@ bake_base_cli := docker buildx bake --file docker-bake.hcl
 ## Command to be used on build (only)
 bake_cli := $(bake_base_cli) --load
 ## Default bake target
-bake_default_target := linux
+bake_default_target := all
 
 .PHONY: build
 .PHONY: test test-alpine test-debian
@@ -84,9 +84,9 @@ build-%: check-reqs target show-%
 	@echo "== building $*"
 	@set -x; $(bake_cli) --metadata-file=target/build-result-metadata_$*.json --set '*.platform=$(OS)/$(ARCH)' '$*'
 
-# Build all default targets independently of the architecture
-every-build: check-reqs show
-	@set -x; $(bake_cli) $(bake_default_target)
+# Build all default targets depending on the current OS but independently of the architecture
+every-build: check-reqs show-$(OS)
+	@set -x; $(bake_base_cli) $(OS)
 
 # Show all default targets
 show:
@@ -110,7 +110,15 @@ tags-%:
 
 # Return the list of targets depending on the current OS and architecture
 list: check-reqs
-	@set -x; make --silent show | jq -r '.target | path(.. | select(.platforms[] | contains("$(OS)/$(ARCH)"))?) | add'
+	@set -x; make --silent listarch-$(ARCH)
+
+# Return the list of targets of a specific "target" (can be a docker bake group)
+list-%: check-reqs
+	@set -x; make --silent show-$* | jq -r '.target | keys[]'
+
+# Return the list of targets depending on the current OS and architecture
+listarch-%: check-reqs
+	@set -x; make --silent showarch-$* | jq -r '.target | keys[]'
 
 # Ensure bats exists in the current folder
 bats:
