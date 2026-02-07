@@ -49,32 +49,41 @@ else
 endif
 	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
+# Build all targets with the current OS and architecture
 build: check-reqs
 	@set -x; $(bake_cli) $(shell make --silent list) --set '*.platform=linux/$(ARCH)'
 
+# Build a specific target with the current OS and architecture
 build-%:
 	@$(call check_image,$*)
 	@echo "== building $*"
 	@set -x; $(bake_cli) '$*' --set '*.platform=linux/$(ARCH)'
 
+# Build all default targets independently of the architecture
 every-build: check-reqs
 	@set -x; $(bake_cli) $(bake_default_target)
 
+# Show all default targets
 show:
 	@set -x; make --silent show-$(bake_default_target)
 
+# Show a specific target
 show-%:
 	@$(bake_base_cli) $* --progress=quiet --print | jq
 
+# List tags of all default targets
 tags:
 	@set -x; make --silent tags-$(bake_default_target)
 
+# List tags of a specific target
 tags-%:
 	@make show-$* | jq -r '.target[].tags[]' | LC_ALL=C sort
 
+# Return the list of targets depending on the current OS and architecture
 list: check-reqs
 	@set -x; make --silent show | jq -r '.target | path(.. | select(.platforms[] | contains("linux/$(ARCH)"))?) | add'
 
+# Ensure bats exists in the current folder
 bats:
 	git clone --branch v1.13.0 https://github.com/bats-core/bats-core ./bats
 
@@ -86,6 +95,7 @@ prepare-test: bats check-reqs target
 target:
 	mkdir -p target
 
+# Publish all default targets
 publish:
 	@set -x; $(bake_base_cli) $(bake_default_target) --push
 
@@ -114,8 +124,10 @@ ifeq ($(CI), true)
 # Execute the test harness and write result to a TAP file
 	IMAGE=$* bats/bin/bats $(CURDIR)/tests/tests_$(shell echo $* |  cut -d "_" -f 1).bats $(bats_flags) --formatter junit | tee target/junit-results-$*.xml
 else
+# Execute the test harness
 	IMAGE=$* bats/bin/bats $(CURDIR)/tests/tests_$(shell echo $* |  cut -d "_" -f 1).bats $(bats_flags)
 endif
 
+# Test targets depending on the current architecture
 test: prepare-test
 	@make --silent list | while read image; do make --silent "test-$${image}"; done
