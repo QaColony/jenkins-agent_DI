@@ -1,4 +1,4 @@
-ROOT:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+ROOT_DIR="$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/"
 
 ## For Docker <=20.04
 export DOCKER_BUILDKIT=1
@@ -48,6 +48,14 @@ else
 	docker buildx create --use --bootstrap --driver docker-container
 endif
 	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+# Lint check on all Dockerfiles
+hadolint:
+	find . -type f -name 'Dockerfile*' -not -path "./bats/*" -print0 | xargs -0 $(ROOT_DIR)/tools/hadolint
+
+# Shellcheck on all bash scripts
+shellcheck:
+	@$(ROOT_DIR)/tools/shellcheck -e SC1091 jenkins-agent *.sh tests/test_helpers.bash tools/hadolint tools/shellcheck
 
 # Build all targets with the current OS and architecture
 build: check-reqs
