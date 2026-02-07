@@ -201,6 +201,13 @@ group "windows" {
   ]
 }
 
+group "all" {
+  targets = [
+    "linux",
+    "windows",
+  ]
+}
+
 ## Common functions
 # Return the registry organization and repository depending on the agent type
 function "orgrepo" {
