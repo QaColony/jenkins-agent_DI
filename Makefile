@@ -55,7 +55,7 @@ hadolint:
 
 # Shellcheck on all bash scripts
 shellcheck:
-	@$(ROOT_DIR)/tools/shellcheck -e SC1091 jenkins-agent *.sh tests/test_helpers.bash tools/hadolint tools/shellcheck
+	@$(ROOT_DIR)/tools/shellcheck -e SC1091 jenkins-agent *.sh tests/test_helpers.bash tests/*.bats tools/hadolint tools/shellcheck
 
 # Build all targets with the current OS and architecture
 build: check-reqs
