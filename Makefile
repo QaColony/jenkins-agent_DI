@@ -150,8 +150,8 @@ test-%: prepare-test
 	@$(call check_image,$*)
 # Ensure that the image is built
 	@set -x; make --silent build-$*
-	@echo "== testing $*"
-	set -x
+# Show bats version
+	@set -x; bats/bin/bats --version
 # Each type of image ("agent" or "inbound-agent") has its own tests suite
 ifeq ($(CI), true)
 # Execute the test harness and write result to a TAP file
