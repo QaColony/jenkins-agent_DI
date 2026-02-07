@@ -124,9 +124,13 @@ prepare-test: bats check-reqs target
 target:
 	mkdir -p target
 
-# Publish all default targets
-publish: target show
-	@set -x; $(bake_base_cli) --metadata-file=target/build-result-metadata_$(bake_default_target)_publish.json --push $(bake_default_target)
+# Publish all targets corresponding to the current OS
+publish:
+	@set -x; make --silent publish-$(OS)
+
+# Publish a specific "target" (can be a docker bake group)
+publish-%: target show-%
+	@set -x; $(bake_base_cli) --metadata-file=target/build-result-metadata_$*_publish.json --push $*
 
 ## Define bats options based on environment
 # common flags for all tests
