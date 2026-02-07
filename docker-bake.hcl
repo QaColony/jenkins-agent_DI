@@ -201,34 +201,6 @@ group "windows" {
   ]
 }
 
-group "linux-arm64" {
-  targets = [
-    "alpine_jdk21",
-    "debian",
-    "rhel_ubi9"
-  ]
-}
-
-group "linux-arm32" {
-  targets = [
-    "debian_jdk17"
-  ]
-}
-
-group "linux-s390x" {
-  targets = [
-    "debian_jdk21"
-  ]
-}
-
-group "linux-ppc64le" {
-  targets = [
-    "debian",
-    "rhel_ubi9"
-  ]
-}
-
-
 ## Common functions
 # Return the registry organization and repository depending on the agent type
 function "orgrepo" {
