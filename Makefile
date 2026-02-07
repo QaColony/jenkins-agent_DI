@@ -75,14 +75,14 @@ shellcheck:
 	@$(ROOT_DIR)/tools/shellcheck -e SC1091 jenkins-agent *.sh tests/test_helpers.bash tests/*.bats tools/hadolint tools/shellcheck
 
 # Build all targets with the current OS and architecture
-build: check-reqs
-	@set -x; $(bake_cli) $(shell make --silent list) --set '*.platform=$(OS)/$(ARCH)'
+build: check-reqs target
+	@set -x; $(bake_cli) --metadata-file=target/build-result-metadata_$(bake_default_target).json --set '*.platform=$(OS)/$(ARCH)' $(shell make --silent list)
 
 # Build a specific target with the current OS and architecture
-build-%:
+build-%: check-reqs target
 	@$(call check_image,$*)
 	@echo "== building $*"
-	@set -x; $(bake_cli) '$*' --set '*.platform=$(OS)/$(ARCH)'
+	@set -x; $(bake_cli) --metadata-file=target/build-result-metadata_$*.json --set '*.platform=$(OS)/$(ARCH)' '$*'
 
 # Build all default targets independently of the architecture
 every-build: check-reqs
@@ -121,8 +121,8 @@ target:
 	mkdir -p target
 
 # Publish all default targets
-publish:
-	@set -x; $(bake_base_cli) $(bake_default_target) --push
+publish: target
+	@set -x; $(bake_base_cli) --metadata-file=target/build-result-metadata_$(bake_default_target)_publish.json --push $(bake_default_target)
 
 ## Define bats options based on environment
 # common flags for all tests
