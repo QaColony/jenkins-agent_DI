@@ -41,6 +41,8 @@ RUN apk add --no-cache \
 
 ENV PATH="/opt/jdk-${JAVA_VERSION}/bin:${PATH}"
 
+# TODO: extract this to a common script instead of ignoring SC2086
+# hadolint ignore=SC2086
 RUN java_major_version="$(jlink --version 2>&1 | cut -c1-2)"; \
   if [[ "${TARGETPLATFORM}" == "linux/arm/v7" || "${java_major_version}" == 25 ]]; then \
     # It is acceptable to have a larger image in arm/v7 (arm 32 bits) environment
@@ -64,6 +66,8 @@ RUN java_major_version="$(jlink --version 2>&1 | cut -c1-2)"; \
 
 ## Agent image target
 FROM alpine:"${ALPINE_TAG}" AS agent
+
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 ARG user=jenkins
 ARG group=jenkins
