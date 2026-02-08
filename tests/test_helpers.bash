@@ -83,7 +83,7 @@ function retry {
 
     for ((i=0; i < attempts; i++)); do
         run "${@}"
-        if [[ "${status}" -eq 0 ]]; then
+        if [[ "${status:-0}" -eq 0 ]]; then
             return 0
         fi
         sleep "${delay}"

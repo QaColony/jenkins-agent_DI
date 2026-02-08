@@ -1,5 +1,6 @@
 ARG UBI9_TAG=9.7-1770238273
 FROM registry.access.redhat.com/ubi9/ubi:"${UBI9_TAG}" AS jre-build
+
 SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
 
 # This Build ARG is populated by Docker
@@ -11,6 +12,7 @@ COPY adoptium-install-jdk.sh /usr/bin/local/adoptium-install-jdk.sh
 
 ARG JAVA_VERSION=17.0.18_8
 
+# hadolint ignore=DL3041
 RUN dnf install --disableplugin=subscription-manager --setopt=install_weak_deps=0 --setopt=tsflags=nodocs --allowerasing -y \
     ca-certificates \
     curl \
@@ -23,6 +25,8 @@ ENV PATH="/opt/jdk-${JAVA_VERSION}/bin:${PATH}"
 # Generate smaller java runtime without unneeded files
 # for now we include the full module path to maintain compatibility
 # while still saving space (approx 200mb from the full distribution)
+# TODO: extract this to a common script instead of ignoring SC2086
+# hadolint ignore=SC2086
 RUN java_major_version="$(jlink --version 2>&1 | cut -c1-2)"; \
   if [[ "${TARGETPLATFORM}" == "linux/arm/v7" || "${java_major_version}" == 25 ]]; then \
     # It is acceptable to have a larger image in arm/v7 (arm 32 bits) environment
@@ -46,6 +50,8 @@ RUN java_major_version="$(jlink --version 2>&1 | cut -c1-2)"; \
 
 FROM registry.access.redhat.com/ubi9/ubi:"${UBI9_TAG}" AS agent
 
+SHELL ["/bin/bash", "-e", "-u", "-o", "pipefail", "-c"]
+
 ARG user=jenkins
 ARG group=jenkins
 ARG uid=1000
@@ -57,6 +63,7 @@ RUN groupadd -g "${gid}" "${group}" \
 ARG AGENT_WORKDIR=/home/"${user}"/agent
 ENV TZ=Etc/UTC
 
+# hadolint ignore=DL3041
 RUN dnf install --disableplugin=subscription-manager --setopt=install_weak_deps=0 --setopt=tsflags=nodocs -y \
       ca-certificates \
       fontconfig \

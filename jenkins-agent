@@ -137,6 +137,7 @@ else
 	#It is fine it blows up for now since it should lead to an error anyway.
 
 	eval "REMOTING_OPTS_A=($REMOTING_OPTS)"
+	# shellcheck disable=SC2086
 	exec $JAVA_BIN $JAVA_OPTIONS -jar $AGENT_FILE $SECRET $AGENT_NAME $TUNNEL $URL $WORKDIR $WEB_SOCKET $DIRECT $PROTOCOLS $INSTANCE_IDENTITY "${REMOTING_OPTS_A[@]}" "$@"
 
 fi
