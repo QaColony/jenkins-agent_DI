@@ -58,13 +58,48 @@ def parallelStages = [failFast: false]
                 node(resolvedAgentLabel) {
                     timeout(time: 60, unit: 'MINUTES') {
                         checkout scm
-                        if (imageType == "linux") {
-                            stage('Prepare Docker') {
+                        stage('Prepare Docker') {
+                            if (isUnix()) {
                                 sh 'make docker-init'
+                            } else {
+                                powershell './make.ps1 docker-init'
+                                archiveArtifacts artifacts: 'build-windows_*.yaml', allowEmptyArchive: true
                             }
                         }
-                        // This function is defined in the jenkins-infra/pipeline-library
-                        if (infra.isTrusted()) {
+
+                        if (isUnix()) {
+                            stage('Checks') {
+                                sh 'make hadolint'
+                                sh 'make shellcheck'
+                            }
+                        }
+
+                        stage('Build') {
+                            if (isUnix()) {
+                                sh 'make build'
+                            } else {
+                                powershell './make.ps1 build'
+                            }
+                            archiveArtifacts artifacts: 'target/build-result-metadata_*.json', allowEmptyArchive: true
+                        }
+
+                        if (!infra.isTrusted()) {
+                            stage('Test') {
+                                if (isUnix()) {
+                                    sh 'make test'
+                                } else {
+                                    powershell './make.ps1 test'
+                                }
+                                junit(allowEmptyResults: true, keepLongStdio: true, testResults: 'target/**/junit-results*.xml')
+                            }
+
+                            if (isUnix()) {
+                                // If the tests are passing for Linux AMD64, then we can build all the CPU architectures
+                                stage('Multiarch build') {
+                                    sh 'make every-build'
+                                }
+                            }
+                        } else {
                             // trusted.ci.jenkins.io builds (e.g. publication to DockerHub)
                             stage('Deploy to DockerHub') {
                                 String[] tagItems = env.TAG_NAME.split('-')
@@ -79,38 +114,13 @@ def parallelStages = [failFast: false]
                                             if (isUnix()) {
                                                 sh 'make publish'
                                             } else {
-                                                powershell '& ./make.ps1 build'
-                                                powershell '& ./make.ps1 publish'
+                                                powershell './make.ps1 publish'
                                             }
                                         }
+                                        archiveArtifacts artifacts: 'target/build-result-metadata_*.json', allowEmptyArchive: true
                                     }
                                 } else {
                                     error("The deployment to Docker Hub failed because the tag doesn't contain any '-'.")
-                                }
-                            }
-                        } else {
-                            // ci.jenkins.io builds (e.g. no publication)
-                            stage('Build') {
-                                if (isUnix()) {
-                                    sh './build.sh'
-                                } else {
-                                    powershell '& ./make.ps1 build'
-                                    archiveArtifacts artifacts: 'build-windows_*.yaml', allowEmptyArchive: true
-                                }
-                            }
-                            stage('Test') {
-                                if (isUnix()) {
-                                    sh './build.sh test'
-                                } else {
-                                    powershell '& ./make.ps1 test'
-                                }
-                                junit(allowEmptyResults: true, keepLongStdio: true, testResults: 'target/**/junit-results*.xml')
-                            }
-                            // If the tests are passing for Linux AMD64, then we can build all the CPU architectures
-                            if (isUnix()) {
-                                stage('Multi-Arch Build') {
-
-                                    sh 'make every-build'
                                 }
                             }
                         }
