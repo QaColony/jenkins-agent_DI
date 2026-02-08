@@ -173,7 +173,7 @@ Test-CommandExists 'docker-compose'
 Test-CommandExists 'docker buildx'
 Test-CommandExists 'yq'
 
-if ($target -eq 'docker-init') {
+if ($Target -eq 'docker-init') {
     Write-Host '= INIT: docker info below'
     docker info
 }
@@ -194,7 +194,7 @@ foreach($agentType in $AgentTypes) {
     Write-Host '= PREPARE: List of images and tags to be processed:'
     Invoke-Expression "$baseDockerCmd config"
 
-    if ($target -eq 'build') {
+    if ($Target -eq 'build') {
         Write-Host '= BUILD: Building all images...'
         switch ($DryRun) {
             $true { Write-Host "(dry-run) $baseDockerBuildCmd" }
@@ -207,7 +207,7 @@ foreach($agentType in $AgentTypes) {
         }
     }
 
-    if ($target -eq 'test') {
+    if ($Target -eq 'test') {
         if ($DryRun) {
             Write-Host '= TEST: (dry-run) test harness'
         } else {
@@ -248,7 +248,7 @@ foreach($agentType in $AgentTypes) {
         }
     }
 
-    if ($target -eq 'publish') {
+    if ($Target -eq 'publish') {
         Write-Host '= PUBLISH: push all images and tags'
         switch($DryRun) {
             $true { Write-Host "(dry-run) $baseDockerCmd push" }
