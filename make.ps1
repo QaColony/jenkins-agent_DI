@@ -1,7 +1,7 @@
 [CmdletBinding()]
 Param(
     [Parameter(Position = 1)]
-    # Default build.ps1 target
+    # Default make.ps1 target
     [String] $Target = 'build',
     # Remoting version to include
     [String] $RemotingVersion = '3355.v388858a_47b_33',
