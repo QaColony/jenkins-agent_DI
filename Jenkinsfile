@@ -79,8 +79,8 @@ def parallelStages = [failFast: false]
                                             if (isUnix()) {
                                                 sh 'make publish'
                                             } else {
-                                                powershell '& ./build.ps1 build'
-                                                powershell '& ./build.ps1 publish'
+                                                powershell '& ./make.ps1 build'
+                                                powershell '& ./make.ps1 publish'
                                             }
                                         }
                                     }
@@ -94,7 +94,7 @@ def parallelStages = [failFast: false]
                                 if (isUnix()) {
                                     sh './build.sh'
                                 } else {
-                                    powershell '& ./build.ps1 build'
+                                    powershell '& ./make.ps1 build'
                                     archiveArtifacts artifacts: 'build-windows_*.yaml', allowEmptyArchive: true
                                 }
                             }
@@ -102,7 +102,7 @@ def parallelStages = [failFast: false]
                                 if (isUnix()) {
                                     sh './build.sh test'
                                 } else {
-                                    powershell '& ./build.ps1 test'
+                                    powershell '& ./make.ps1 test'
                                 }
                                 junit(allowEmptyResults: true, keepLongStdio: true, testResults: 'target/**/junit-results*.xml')
                             }

@@ -312,12 +312,12 @@ make: 'bats' is up to date.
 
 #### Building all images
 
-Run `.\build.ps1` to launch the build of the images corresponding to the "windows" target of docker-bake.hcl.
+Run `.\make.ps1` to launch the build of the images corresponding to the "windows" target of docker-bake.hcl.
 
 Internally, the first time you'll run this script and if there is no build-windows_<AGENT_TYPE>_<WINDOWS_FLAVOR>_<WINDOWS_VERSION>.yaml file in your repository, it will use a combination of `docker buildx bake` and `yq` to generate a  build-windows_<AGENT_TYPE>_<WINDOWS_FLAVOR>_<WINDOWS_VERSION>.yaml docker compose file containing all Windows image definitions from docker-bake.hcl. Then it will run `docker compose` on this file to build these images.
 
-You can modify this docker compose file as you want, then rerun `.\build.ps1`.
-It won't regenerate the docker compose file from docker-bake.hcl unless you add the `-OverwriteDockerComposeFile` build.ps1 parameter:  `.\build.ps1 -OverwriteDockerComposeFile`.
+You can modify this docker compose file as you want, then rerun `.\make.ps1`.
+It won't regenerate the docker compose file from docker-bake.hcl unless you add the `-OverwriteDockerComposeFile` make.ps1 parameter:  `.\make.ps1 -OverwriteDockerComposeFile`.
 
 Note: you can generate this docker compose file from docker-bake.hcl yourself with the following command (require `docker buildx` and `yq`):
 
@@ -331,16 +331,16 @@ $ docker buildx bake --progress=plain --file=docker-bake.hcl windows --print `
     | Out-File -FilePath build-windows_mybuild.yaml
 ```
 
-Note that you don't need build.ps1 to build (or to publish) your images from this docker compose file, you can use `docker compose --file=build-windows_mybuild.yaml build`.
+Note that you don't need make.ps1 to build (or to publish) your images from this docker compose file, you can use `docker compose --file=build-windows_mybuild.yaml build`.
 
 #### Testing all images
 
-Run `.\build.ps1 test` if you also want to run the tests harness suit.
+Run `.\make.ps1 test` if you also want to run the tests harness suit.
 
-Run `.\build.ps1 test -TestsDebug 'debug'` to also get commands & stderr of tests, displayed on top of them.
+Run `.\make.ps1 test -TestsDebug 'debug'` to also get commands & stderr of tests, displayed on top of them.
 You can set it to `'verbose'` to also get stdout of every test command.
 
-Note that instead of passing `-TestsDebug` parameter to build.ps1, you can set the  $env:TESTS_DEBUG environment variable to the desired value.
+Note that instead of passing `-TestsDebug` parameter to make.ps1, you can set the  $env:TESTS_DEBUG environment variable to the desired value.
 
 Also note that contrary to the Linux part, you have to build the images before testing them.
 
@@ -383,16 +383,16 @@ bats ./tests/tags.bats
 
 #### Dry run
 
-Add the `-DryRun` parameter to print out any build, publish or tests commands instead of executing them: `.\build.ps1 test -DryRun`
+Add the `-DryRun` parameter to print out any build, publish or tests commands instead of executing them: `.\make.ps1 test -DryRun`
 
 #### Building and testing a specific image
 
 You can build (and test) only one image type by setting `-ImageType` to a combination of Windows flavors ("nanoserver" & "windowsservercore") and Windows versions ("ltsc2019", "ltsc2022").
 
-Ex: `.\build.ps1 -ImageType 'nanoserver-ltsc2019'`
+Ex: `.\make.ps1 -ImageType 'nanoserver-ltsc2019'`
 
 You can also build (and test) only one agent type by setting `-AgentType` to either "agent" or "inbound-agent".
 
-Ex: `.\build.ps1 -AgentType 'agent'`
+Ex: `.\make.ps1 -AgentType 'agent'`
 
 Both parameters can be combined.
