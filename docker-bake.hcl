@@ -67,7 +67,7 @@ variable "DEBIAN_RELEASE" {
 }
 
 variable "UBI9_TAG" {
-  default = "9.8-1780554162"
+  default = "9.8-1780900431"
 }
 
 # Set this value to a specific Windows version to override Windows versions to build returned by windowsversions function
