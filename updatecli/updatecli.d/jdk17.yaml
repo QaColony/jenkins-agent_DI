@@ -72,18 +72,6 @@ targets:
         keyword: ARG
         matcher: JAVA_VERSION
     scmid: default
-  setJDK17VersionWindows:
-    name: "Bump JDK17 default ARG version in Windows images"
-    kind: dockerfile
-    sourceid: lastVersion
-    spec:
-      files:
-        - windows/nanoserver/Dockerfile
-        - windows/windowsservercore/Dockerfile
-      instruction:
-        keyword: ARG
-        matcher: JAVA_VERSION
-    scmid: default
   setJDK17VersionReadme:
     name: "Bump JDK17 version in README.md file"
     kind: file
